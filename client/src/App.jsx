@@ -56,9 +56,9 @@ export default function App() {
   const fetchAllData = async () => {
     try {
       const [tasksRes, timetableRes, sessionsRes] = await Promise.all([
-        axios.get(`${API_URL}/tasks`),
-        axios.get(`${API_URL}/timetable`),
-        axios.get(`${API_URL}/sessions`)
+        axios.get(`${API_URL}/api/tasks`),
+        axios.get(`${API_URL}/api/timetable`),
+        axios.get(`${API_URL}/api/sessions`)
       ]);
       setTasks(tasksRes.data);
       setTimetable(timetableRes.data);
@@ -93,7 +93,7 @@ export default function App() {
 
   const logStudySession = async (duration) => {
     try {
-      const res = await axios.post(`${API_URL}/sessions`, { durationMinutes: duration });
+      const res = await axios.post(`${API_URL}/api/sessions`, { durationMinutes: duration });
       setSessions([...sessions, res.data]);
     } catch (err) {
       console.error('Error logging session', err);
@@ -103,7 +103,7 @@ export default function App() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setAuthError('');
-    const endpoint = isRegistering ? '/auth/register' : '/auth/login';
+    const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
     try {
       const res = await axios.post(`${API_URL}${endpoint}`, { email, password });
       if (isRegistering) {
@@ -131,7 +131,7 @@ export default function App() {
     e.preventDefault();
     if (!title.trim()) return;
     try {
-      const res = await axios.post(`${API_URL}/tasks`, {
+      const res = await axios.post(`${API_URL}/api/tasks`, {
         title,
         subject: subject || 'General',
         priority,
@@ -151,7 +151,7 @@ export default function App() {
 
   const toggleTaskComplete = async (id, currentStatus) => {
     try {
-      const res = await axios.put(`${API_URL}/tasks/${id}`, { completed: !currentStatus });
+      const res = await axios.put(`${API_URL}/api/tasks/${id}`, { completed: !currentStatus });
       setTasks(tasks.map((t) => (t._id === id ? res.data : t)));
     } catch (err) {
       console.error('Error updating task', err);
@@ -160,7 +160,7 @@ export default function App() {
 
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`${API_URL}/tasks/${id}`);
+      await axios.delete(`${API_URL}/api/tasks/${id}`);
       setTasks(tasks.filter((t) => t._id !== id));
     } catch (err) {
       console.error('Error deleting task', err);
@@ -171,7 +171,7 @@ export default function App() {
     e.preventDefault();
     if (!classSubject.trim() || !classTime.trim()) return;
     try {
-      const res = await axios.post(`${API_URL}/timetable`, {
+      const res = await axios.post(`${API_URL}/api/timetable`, {
         day: classDay,
         time: classTime,
         subject: classSubject,
@@ -188,7 +188,7 @@ export default function App() {
 
   const deleteClass = async (id) => {
     try {
-      await axios.delete(`${API_URL}/timetable/${id}`);
+      await axios.delete(`${API_URL}/api/timetable/${id}`);
       setTimetable(timetable.filter((item) => item._id !== id));
     } catch (err) {
       console.error('Error deleting timetable slot', err);
@@ -333,7 +333,10 @@ export default function App() {
                       />
                       <div>
                         <h4>{task.title}</h4>
-                        <span className="task-meta">{task.subject} • Due: {task.deadline || 'No deadline'} • <span className={`priority-${task.priority.toLowerCase()}`}>{task.priority}</span></span>
+                        <span className="task-meta">
+                          {task.subject} | Due: {task.deadline || 'No deadline'} | 
+                          <span className={`priority-${task.priority.toLowerCase()}`}>{task.priority}</span>
+                        </span>
                         {task.notes && <p className="task-notes">📝 {task.notes}</p>}
                       </div>
                     </div>
